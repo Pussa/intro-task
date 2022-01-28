@@ -10,6 +10,7 @@ import java.util.List;
 public class Runner {
 
     public static void main(String[] args) throws IOException {
+        int shortStringLength = 15;
         InputStream inputStream = System.in;
         Reader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -18,11 +19,16 @@ public class Runner {
         List<String> strings = new ArrayList<>(List.of(StringUtils.substringsBetween(string, "“", "”")));
 
         for (String s : strings) {
-            String newS =  s.replaceAll("\\s", "");
-            String methodName = newS.substring(6, 15);
+            String newS = s.replaceAll("\\s", "");
 
-            String firstParam = newS.length() <= 15 ? "" : newS.substring(16, 24);
-            String secondParam = newS.length() <= 15 ? "" : newS.substring(25);
+            String methodName = newS.length() <= shortStringLength ? StringUtils.substringAfter(newS, "|")
+                    : StringUtils.substringBetween(newS, "|", "|");
+            String firstParam = newS.length() <= shortStringLength ? ""
+                    : StringUtils.substringAfterLast(newS, "|");
+            firstParam = newS.length() <= shortStringLength ? ""
+                    : StringUtils.substringBefore(firstParam, ";");
+            String secondParam = newS.length() <= shortStringLength ? ""
+                    : StringUtils.substringAfter(newS, ";");
 
             System.setProperty("firstParam", firstParam);
             System.setProperty("secondParam", secondParam);
