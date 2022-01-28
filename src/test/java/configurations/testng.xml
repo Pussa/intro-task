@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="intro" >
+    <test name="action1_a">
+        <classes>
+            <class name="tests.Test1">
+                <methods>
+                    <include name="action1_a"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action1_b">
+        <classes>
+            <class name="tests.Test1">
+                <methods>
+                    <include name="action1_b"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action2_a">
+        <classes>
+            <class name="tests.Test2">
+                <methods>
+                    <include name="action2_a"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action2_b">
+        <classes>
+            <class name="tests.Test2">
+                <methods>
+                    <include name="action2_b"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action3_a">
+        <classes>
+            <class name="tests.Test3">
+                <methods>
+                    <include name="action3_a"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action3_b">
+        <classes>
+            <class name="tests.Test3">
+                <methods>
+                    <include name="action3_b"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action4_a">
+        <classes>
+            <class name="tests.Test4">
+                <methods>
+                    <include name="action4_a"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    <test name="action4_b">
+        <classes>
+            <class name="tests.Test4">
+                <methods>
+                    <include name="action4_b"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
+

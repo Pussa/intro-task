@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="tests.Test3" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-01-27T20:11:10" hostname="iMac-Mikhail" time="0.004">
+  <properties/>
+  <testcase name="action3_b[0](, )" classname="tests.Test3" time="0.004"/>
+  <system-out><![CDATA[Test3|action3_b|;
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
