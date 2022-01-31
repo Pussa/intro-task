@@ -1,6 +1,7 @@
 
 .gradle
 build
+test-output
 # Compiled class file
 *.class
 
