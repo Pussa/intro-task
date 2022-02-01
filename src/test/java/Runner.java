@@ -1,5 +1,7 @@
+import oops.ClassObject;
+import oops.Method;
+import oops.Params;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -11,14 +13,10 @@ import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.apache.poi.ss.usermodel.CellType.BLANK;
-import static org.apache.poi.ss.usermodel.CellType._NONE;
+import static org.apache.commons.lang3.StringUtils.substringsBetween;
 
 public class Runner {
 
@@ -26,43 +24,51 @@ public class Runner {
     static String methodName;
     static String firstParam;
     static String secondParam;
+    static Params params = new Params();
+    static ClassObject classObject = new ClassObject();
+    static Method method = new Method();
 
     public static void main(String[] args) throws IOException {
-
         InputStream inputStream = System.in;
         Reader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         String string = bufferedReader.readLine();
         if (string.equals("file")) {
-            setParamsFromExcel();
+            runFromExcel();
         } else {
-            setParamsFromString(string);
+            runFromString(string);
         }
     }
 
-    public static void setParamsFromString(String string) {
-        int shortStringLength = 15;
+    public static void runFromString(String string) {
+
         List<String> strings = new ArrayList<>(List.of(substringsBetween(string, "“", "”")));
-
-        for (String s : strings) {
-            String newS = s.replaceAll("\\s", "");
-
-            className = substringBefore(newS, "|");
-            methodName = newS.length() <= shortStringLength ? substringAfter(newS, "|")
-                    : substringBetween(newS, "|", "|");
-            firstParam = newS.length() <= shortStringLength ? ""
-                    : substringAfterLast(newS, "|");
-            firstParam = newS.length() <= shortStringLength ? ""
-                    : substringBefore(firstParam, ";");
-            secondParam = newS.length() <= shortStringLength ? ""
-                    : substringAfter(newS, ";");
-
+        Consumer<String> cons = s -> {
+            className = classObject.getStep(s);
+            methodName = method.getStep(s);
+            firstParam = params.getFirstParam(params.getStep(s));
+            secondParam = params.getSecondParam(params.getStep(s));
             runTest(strings.indexOf(s));
-        }
+        };
+        strings
+                .stream()
+                .map(s -> s.replaceAll("\\s", ""))
+                .forEach(cons);
+        // обычный фор
+//        for (String s : strings) {
+//            String newS = s.replaceAll("\\s", "");
+//
+//            className = classObject.getStep(newS);
+//            methodName = method.getStep(newS);
+//            firstParam = params.getFirstParam(params.getStep(newS));
+//            secondParam = params.getSecondParam(params.getStep(newS));
+//
+//            runTest(strings.indexOf(s));
+//        }
     }
 
-    public static void setParamsFromExcel() throws IOException {
+    public static void runFromExcel() throws IOException {
         FileInputStream inputStream = new FileInputStream("src/test/resources/intro-task.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         XSSFSheet sheet = workbook.getSheetAt(0);
@@ -75,15 +81,13 @@ public class Runner {
                 rowNumber = cell.getRowIndex();
                 switch (cell.getAddress().getColumn()) {
                     case 0:
-                        className = cell.getStringCellValue();
+                        className = classObject.getStep(cell);
                     case 1:
-                        methodName = cell.getStringCellValue();
+                        methodName = method.getStep(cell);
                     case 2:
-                        firstParam = (cell.getCellType() != _NONE || cell.getCellType() != BLANK)
-                                ? cell.getStringCellValue() : "";
+                        firstParam = params.getStep(cell);
                     case 3:
-                        secondParam = (cell.getCellType() != _NONE || cell.getCellType() != BLANK)
-                                ? cell.getStringCellValue() : "";
+                        secondParam = params.getStep(cell);
                 }
             }
             if (className.equals(""))
