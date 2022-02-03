@@ -1,3 +1,4 @@
+import oops.Steps;
 import oops.StringParser;
 import oops.SuiteBuilder;
 import oops.XLSXParser;
@@ -19,27 +20,27 @@ public class Runner {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         String string = bufferedReader.readLine();
 
-        ArrayList<List<String>> allSteps;
+        ArrayList<Steps> allSteps;
         if (string.equals("file")) {
             allSteps = new XLSXParser().parse();
         } else {
             System.setProperty("string", string);
             allSteps = new StringParser().parse();
         }
+
         runTest(allSteps);
     }
 
-    private static void runTest(ArrayList<List<String>> allSteps) {
-        Consumer<List<String>> consumer = s -> {
-            System.setProperty("firstParam", s.get(2));
-            System.setProperty("secondParam", s.get(3));
+    private static void runTest(ArrayList<Steps> allSteps) {
+        Consumer<Steps> consumer = s -> {
+
             List<XmlSuite> suites = new ArrayList<>();
-            suites.add(new SuiteBuilder().createSuite(allSteps.indexOf(s), s.get(0), s.get(1)));
+            suites.add(new SuiteBuilder().createSuite(allSteps.indexOf(s), s.getClassName(), s.getMethodName(), s.getParams()));
 
             TestListenerAdapter tla = new TestListenerAdapter();
             TestNG testng = new TestNG();
             testng.setXmlSuites(suites);
-            testng.setTestNames(Collections.singletonList(s.get(1)));
+            testng.setTestNames(Collections.singletonList(s.getMethodName()));
             testng.addListener(tla);
             testng.run();
         };

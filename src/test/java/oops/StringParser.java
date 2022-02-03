@@ -9,14 +9,18 @@ import static org.apache.commons.lang3.StringUtils.substringsBetween;
 public class StringParser implements Parser {
 
     @Override
-    public ArrayList<List<String>> parse() {
+    public ArrayList<Steps> parse() {
         List<String> strings = new ArrayList<>(List.of(substringsBetween(System.getProperty("string"), "“", "”")));
-        ArrayList<List<String>> allSteps = new ArrayList<>();
-        Consumer<String> cons = s -> allSteps.add(List.of(
-                steps.getClassObject(s),
-                steps.getMethod(s),
-                steps.getFirstParam(steps.getParams(s)),
-                steps.getSecondParam(steps.getParams(s))));
+        ArrayList<Steps> allSteps = new ArrayList<>();
+        Consumer<String> cons = s -> {
+            Steps steps = new Steps();
+            steps.setClassName(getClassObject(s));
+            steps.setMethodName(getMethod(s));
+            String params = getParams(s);
+
+            steps.setParams(List.of(getFirstParam(params), getSecondParam(params)));
+            allSteps.add(steps);
+        };
         strings
                 .stream()
                 .map(s -> s.replaceAll("\\s", ""))

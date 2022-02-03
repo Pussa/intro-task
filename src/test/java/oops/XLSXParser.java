@@ -8,40 +8,35 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class XLSXParser implements Parser {
     @Override
-    public ArrayList<List<String>> parse() throws IOException {
+    public ArrayList<Steps> parse() throws IOException {
         FileInputStream inputStream = new FileInputStream("src/test/resources/intro-task.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         XSSFSheet sheet = workbook.getSheetAt(0);
 
-        ArrayList<List<String>> allSteps = new ArrayList<>();
+        ArrayList<Steps> allSteps = new ArrayList<>();
         for (Row row : sheet) {
-            Iterator<Cell> cellIterator = row.cellIterator();
-
-            String classObject = "";
-            String method = "";
-            String firstParam = "";
-            String secondParam = "";
-            while (cellIterator.hasNext()) {
-                Cell cell = cellIterator.next();
-                switch (cell.getAddress().getColumn()) {
-                    case 0:
-                        classObject = steps.getClassObject(cell);
-                    case 1:
-                        method = steps.getMethod(cell);
-                    case 2:
-                        firstParam = steps.getParams(cell);
-                    case 3:
-                        secondParam = steps.getParams(cell);
+            Steps step = new Steps();
+            List<String> params = new ArrayList<>();
+            for (Cell cell : row) {
+                int index = cell.getColumnIndex();
+                if (index == 0) {
+                    step.setClassName(getClassObject(cell));
+                } else if (index == 1) {
+                    step.setMethodName(getMethod(cell));
+                } else if (index == 2) {
+                    params.add(getParams(cell));
+                } else if (index == 3) {
+                    params.add(getParams(cell));
                 }
             }
-            if (classObject.equals(""))
+            step.setParams(params);
+            if (step.getClassName().equals(""))
                 break;
-            allSteps.add(List.of(classObject, method, firstParam, secondParam));
+            allSteps.add(step);
         }
         return allSteps;
     }
