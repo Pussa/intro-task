@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class XLSXParser implements Parser {
     @Override
@@ -39,5 +40,10 @@ public class XLSXParser implements Parser {
             allSteps.add(step);
         }
         return allSteps;
+    }
+
+    @Override
+    public Map<String, List<CodeBuildSteps>> parseForBuild() {
+        return null;
     }
 }

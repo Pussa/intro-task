@@ -1,7 +1,4 @@
-import oops.Steps;
-import oops.StringParser;
-import oops.SuiteBuilder;
-import oops.XLSXParser;
+import oops.*;
 import org.testng.TestListenerAdapter;
 import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
@@ -10,6 +7,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Runner {
@@ -21,13 +19,15 @@ public class Runner {
         String string = bufferedReader.readLine();
 
         ArrayList<Steps> allSteps;
+        Map<String ,List<CodeBuildSteps>> codeBuild = null;
         if (string.equals("file")) {
             allSteps = new XLSXParser().parse();
         } else {
             System.setProperty("string", string);
+            codeBuild = new CodeBuildParser().parseForBuild();
             allSteps = new StringParser().parse();
         }
-
+        new CodeBuilder().build(codeBuild);
         runTest(allSteps);
     }
 

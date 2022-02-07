@@ -2,6 +2,7 @@ package oops;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.substringsBetween;
@@ -26,5 +27,10 @@ public class StringParser implements Parser {
                 .map(s -> s.replaceAll("\\s", ""))
                 .forEach(cons);
         return allSteps;
+    }
+
+    @Override
+    public Map<String, List<CodeBuildSteps>> parseForBuild() {
+        return null;
     }
 }

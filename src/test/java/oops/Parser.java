@@ -4,6 +4,8 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.poi.ss.usermodel.CellType.BLANK;
@@ -11,6 +13,7 @@ import static org.apache.poi.ss.usermodel.CellType._NONE;
 
 public interface Parser {
     ArrayList<Steps> parse() throws IOException;
+    Map<String , List<CodeBuildSteps>> parseForBuild();
 
     default String getClassObject(Object s) {
         String newS;
