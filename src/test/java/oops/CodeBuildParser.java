@@ -3,25 +3,31 @@ package oops;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class CodeBuildParser implements Parser  {
+public class CodeBuildParser implements Parser {
 
     @Override
-    public Map<String ,List<CodeBuildSteps>> parseForBuild() {
+    public Map<String, List<CodeBuildSteps>> parseForBuild() {
         String className = "Suite55";
         List<String> strings = new ArrayList<>(List.of(substringsBetween(System.getProperty("string"), "“", "”")));
         List<CodeBuildSteps> steps = new ArrayList<>();
         Consumer<String> consumer = s -> {
             CodeBuildSteps st = new CodeBuildSteps();
-            st.setInnerClassName(getClassObject(s));
-            st.setInnerMethodName(getMethod(s));
-            st.setParams(List.of(getFirstParam(getParams(s)), getSecondParam(getParams(s))));
+            if (s.startsWith("Reports.logCase")) {
+                st.setAnnotation(getAnnotation(s));
+                st.setInnerClassName(getInnerClassName(s));
+            } else {
+                st.setInnerClassName(getClassObject(s));
+            }
+            st.setInnerMethodName(getInnerMethodName(s));
+            st.setParams(getParams(s));
             steps.add(st);
         };
         strings.forEach(consumer);
-        Map<String , List<CodeBuildSteps>> result = new HashMap<>();
-        result.put(className,steps);
+        Map<String, List<CodeBuildSteps>> result = new HashMap<>();
+        result.put(className, steps);
         return result;
     }
 
@@ -30,17 +36,22 @@ public class CodeBuildParser implements Parser  {
         return null;
     }
 
+    private String getAnnotation(String s) {
+        return substringBefore(s, ":");
+    }
 
-    // пока закоменчено, если вдруг понадобятся отдельные геттеры
-//    private String getInnerClassName(String s) {
-//        return substringBefore(s, "-").trim();
-//    }
-//
-//    private String getInnerMethodName(String s) {
-//        return substringBetween(s, "-","-");
-//    }
-//
-//    private List<String> getParams(String s) {
-//        return Arrays.asList(substringAfterLast(s, "-").split(",", -1));
-//    }
+
+    private String getInnerClassName(String s) {
+        return substringBetween(s, ":", "|").trim();
+    }
+
+    private String getInnerMethodName(String s) {
+        return s.contains(";") ? substringBetween(s, "|") : substringAfter(s, "|");
+    }
+
+    private List<String> getParams(String s) {
+        return countMatches(s,"|") ==2 ?
+                Arrays.asList(substringAfterLast(s, "|").split(";", -1))
+                : singletonList("");
+    }
 }
