@@ -8,10 +8,15 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class CodeBuildParser implements Parser {
 
+    private final String string;
+    public CodeBuildParser(String string) {
+        this.string = string;
+    }
+
     @Override
     public Map<String, List<CodeBuildSteps>> parseForBuild() {
         String className = "Suite55";
-        List<String> strings = new ArrayList<>(List.of(substringsBetween(System.getProperty("string"), "“", "”")));
+        List<String> strings = new ArrayList<>(List.of(substringsBetween(string, "“", "”")));
         List<CodeBuildSteps> steps = new ArrayList<>();
         Consumer<String> consumer = s -> {
             CodeBuildSteps st = new CodeBuildSteps();
@@ -40,17 +45,16 @@ public class CodeBuildParser implements Parser {
         return substringBefore(s, ":");
     }
 
-
     private String getInnerClassName(String s) {
         return substringBetween(s, ":", "|").trim();
     }
 
     private String getInnerMethodName(String s) {
-        return s.contains(";") ? substringBetween(s, "|") : substringAfter(s, "|");
+        return countMatches(s, "|") == 2 ? substringBetween(s, "|") : substringAfter(s, "|");
     }
 
     private List<String> getParams(String s) {
-        return countMatches(s,"|") ==2 ?
+        return countMatches(s, "|") == 2 ?
                 Arrays.asList(substringAfterLast(s, "|").split(";", -1))
                 : singletonList("");
     }

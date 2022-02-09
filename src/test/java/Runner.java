@@ -7,7 +7,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class Runner {
@@ -18,22 +17,16 @@ public class Runner {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         String string = bufferedReader.readLine();
 
-        ArrayList<Steps> allSteps;
-        Map<String ,List<CodeBuildSteps>> codeBuild = null;
         if (string.equals("file")) {
-            allSteps = new XLSXParser().parse();
+            runTest(new XLSXParser().parse());
         } else {
-            System.setProperty("string", string);
-            codeBuild = new CodeBuildParser().parseForBuild();
-            allSteps = new StringParser().parse();
+            new CodeBuilder().build(new CodeBuildParser(string).parseForBuild());
+            runTest(new StringParser(string).parse());
         }
-        new CodeBuilder().build(codeBuild);
-        runTest(allSteps);
     }
 
     private static void runTest(ArrayList<Steps> allSteps) {
         Consumer<Steps> consumer = s -> {
-
             List<XmlSuite> suites = new ArrayList<>();
             suites.add(new SuiteBuilder().createSuite(allSteps.indexOf(s), s.getClassName(), s.getMethodName(), s.getParams()));
 
