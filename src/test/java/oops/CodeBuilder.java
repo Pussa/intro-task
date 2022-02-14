@@ -1,65 +1,94 @@
 package oops;
 
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
 import org.testng.annotations.Test;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+//[“Reports.logCase("asd)”, “Test3|action3_b|data3b_1; data3b_2” , “Reports.logCase("12")”, “Test1|action1_a”, ….]
 public class CodeBuilder {
 
-    public void build(Map<String, List<CodeBuildSteps>> map) throws IOException {
-        String className = String.valueOf(map.keySet().toArray()[0]);
-        List<CodeBuildSteps> steps = map.get(className);
-        List<CodeBlock> codeBlock = new ArrayList<>();
-        final MethodSpec.Builder[] methodSpec = new MethodSpec.Builder[1];
-        List<MethodSpec> methods = new ArrayList<>();
-
-        Consumer<CodeBuildSteps> consumer = s -> {
-            if (steps.indexOf(s) == 0 && s.getAnnotation() == null)
-                methodSpec[0] = initializeMethod(className, methods);
-            else if (steps.indexOf(s) == 0 && s.getAnnotation() != null)
-                methodSpec[0] = initializeMethodWithAnnotation(className, methods);
-
-            if (s.getAnnotation() != null && steps.indexOf(s) != 0) {
-                methods.add(createMethod(methodSpec[0], codeBlock));
-                codeBlock.clear();
-                codeBlock.add(createCodeBlock(s));
-                methodSpec[0] = initializeMethodWithAnnotation(className, methods);
-            } else {
-                codeBlock.add(createCodeBlock(s));
-            }
-            if (steps.indexOf(s) == steps.size() - 1) {
-                methods.add(createMethod(methodSpec[0], codeBlock));
-            }
-        };
-        steps.forEach(consumer);
+    public void build(List<Steps> steps) throws IOException {
+        String className = "Suite55";
+        Map<String, List<Steps>> allPairs = separateSteps(steps);
+        List<MethodSpec> methods = buildMethods(allPairs, className);
         JavaFile javaFile = createFile(className, methods);
         File file = new File("src/test/java");
         javaFile.writeTo(file);
     }
 
-    private CodeBlock createCodeBlock(CodeBuildSteps s) {
+    private Map<String, List<Steps>> separateSteps(List<Steps> steps) {
+        Map<String, List<Steps>> allPairs = new HashMap<>();
+        final List<Steps>[] ss = new List[]{new ArrayList<>()};
+        final String[] logCase = new String[1];
+        logCase[0] = null;
+        Consumer<Steps> cons = s -> {
+
+            if (s.getClassName().contains("Reports.logCase") && steps.indexOf(s) == 0) {
+                logCase[0] = s.getClassName();
+            } else if (s.getClassName().contains("Reports.logCase") && steps.indexOf(s) != 0) {
+                allPairs.put(logCase[0], ss[0]);
+                logCase[0] = s.getClassName();
+                ss[0] = new ArrayList<>();
+            } else {
+                ss[0].add(s);
+            }
+
+            if (steps.indexOf(s) == steps.size() - 1) {
+                allPairs.put(logCase[0], ss[0]);
+            }
+        };
+
+        steps.forEach(cons);
+        return allPairs;
+    }
+
+    private List<MethodSpec> buildMethods(Map<String, List<Steps>> allPairs, String className) {
+        List<MethodSpec> methods = new ArrayList<>();
+        allPairs.forEach((annotation, steps) -> {
+
+            int index = new ArrayList<>(allPairs.keySet()).indexOf(annotation);
+            MethodSpec.Builder methodSpec;
+            List<CodeBlock> codeBlocks = new ArrayList<>();
+
+            if (annotation == null) {
+                methodSpec = initializeMethod(className, index);
+            } else {
+                methodSpec = initializeMethodWithAnnotation(className, index);
+            }
+
+            steps.forEach(c -> codeBlocks.add(createCodeBlock(c)));
+            methods.add(createMethod(methodSpec, codeBlocks));
+        });
+        return methods;
+    }
+
+    private CodeBlock createCodeBlock(Steps s) {
         return CodeBlock
                 .builder()
-                .addStatement(s.getInnerClassName() + "." + s.getInnerMethodName()
+                .addStatement(s.getClassName() + "." + s.getMethodName()
                         + "(" + s.getParams().toString().replace("[", "").replace("]", "") + ")")
                 .build();
     }
 
-    private MethodSpec.Builder initializeMethod(String className, List<MethodSpec> methods) {
+    private MethodSpec.Builder initializeMethod(String className, int number) {
         return MethodSpec
-                .methodBuilder(className + "Test" + methods.size());
+                .methodBuilder(className + "Test" + number);
     }
 
-    private MethodSpec.Builder initializeMethodWithAnnotation(String className, List<MethodSpec> methods) {
+    private MethodSpec.Builder initializeMethodWithAnnotation(String className, int number) {
         return MethodSpec
-                .methodBuilder(className + "Test" + methods.size())
+                .methodBuilder(className + "Test" + number)
                 .addAnnotation(Override.class); //здесь вместо оверайда можно поставить нужную нам аннотацию
     }
 

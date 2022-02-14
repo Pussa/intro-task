@@ -9,7 +9,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import static org.apache.poi.ss.usermodel.CellType.BLANK;
+import static org.apache.poi.ss.usermodel.CellType._NONE;
 
 public class XLSXParser implements Parser {
     @Override
@@ -25,7 +27,7 @@ public class XLSXParser implements Parser {
             for (Cell cell : row) {
                 int index = cell.getColumnIndex();
                 if (index == 0) {
-                    step.setClassName(getClassObject(cell));
+                    step.setClassName(getClassName(cell));
                 } else if (index == 1) {
                     step.setMethodName(getMethod(cell));
                 } else if (index == 2) {
@@ -42,8 +44,8 @@ public class XLSXParser implements Parser {
         return allSteps;
     }
 
-    @Override
-    public Map<String, List<CodeBuildSteps>> parseForBuild() {
-        return null;
+    private String getParams(Cell cell) {
+        return (cell.getCellType() != _NONE || cell.getCellType() != BLANK)
+                ? cell.getStringCellValue() : "";
     }
 }

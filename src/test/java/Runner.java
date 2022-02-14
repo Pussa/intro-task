@@ -17,15 +17,17 @@ public class Runner {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         String string = bufferedReader.readLine();
 
+        List<Steps> allSteps;
         if (string.equals("file")) {
-            runTest(new XLSXParser().parse());
+            allSteps = new XLSXParser().parse();
         } else {
-            new CodeBuilder().build(new CodeBuildParser(string).parseForBuild());
-            runTest(new StringParser(string).parse());
+            allSteps = new StringParser(string).parse();
         }
+        new CodeBuilder().build(allSteps);
+        runTest(allSteps);
     }
 
-    private static void runTest(ArrayList<Steps> allSteps) {
+    private static void runTest(List<Steps> allSteps) {
         Consumer<Steps> consumer = s -> {
             List<XmlSuite> suites = new ArrayList<>();
             suites.add(new SuiteBuilder().createSuite(allSteps.indexOf(s), s.getClassName(), s.getMethodName(), s.getParams()));

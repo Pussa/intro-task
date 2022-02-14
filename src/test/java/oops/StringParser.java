@@ -1,15 +1,17 @@
 package oops;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
-import static org.apache.commons.lang3.StringUtils.substringsBetween;
+import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class StringParser implements Parser {
 
     private final String string;
+
     public StringParser(String string) {
         this.string = string;
     }
@@ -20,10 +22,13 @@ public class StringParser implements Parser {
         ArrayList<Steps> allSteps = new ArrayList<>();
         Consumer<String> cons = s -> {
             Steps steps = new Steps();
-            steps.setClassName(getClassObject(s));
-            steps.setMethodName(getMethod(s));
-            String params = getParams(s);
-            steps.setParams(List.of(getFirstParam(params), getSecondParam(params)));
+            if (s.startsWith("Reports.logCase")) {
+                steps.setClassName(s);
+            } else {
+                steps.setClassName(getClassName(s));
+                steps.setMethodName(getMethod(s));
+                steps.setParams(getParams(s));
+            }
             allSteps.add(steps);
         };
         strings
@@ -33,8 +38,9 @@ public class StringParser implements Parser {
         return allSteps;
     }
 
-    @Override
-    public Map<String, List<CodeBuildSteps>> parseForBuild() {
-        return null;
+    public List<String> getParams(String s) {
+        return countMatches(s, "|") == 2 ?
+                Arrays.asList(substringAfterLast(s, "|").split(";", -1))
+                : singletonList("");
     }
 }
