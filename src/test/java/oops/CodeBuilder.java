@@ -29,7 +29,7 @@ public class CodeBuilder {
 
     private Map<String, List<Steps>> separateSteps(List<Steps> steps) {
         Map<String, List<Steps>> allPairs = new HashMap<>();
-        final List<Steps>[] ss = new List[]{new ArrayList<>()};
+        final List<Steps>[] templateSteps = new List[]{new ArrayList<>()};
         final String[] logCase = new String[1];
         logCase[0] = null;
         Consumer<Steps> cons = s -> {
@@ -37,15 +37,15 @@ public class CodeBuilder {
             if (s.getClassName().contains("Reports.logCase") && steps.indexOf(s) == 0) {
                 logCase[0] = s.getClassName();
             } else if (s.getClassName().contains("Reports.logCase") && steps.indexOf(s) != 0) {
-                allPairs.put(logCase[0], ss[0]);
+                allPairs.put(logCase[0], templateSteps[0]);
                 logCase[0] = s.getClassName();
-                ss[0] = new ArrayList<>();
+                templateSteps[0] = new ArrayList<>();
             } else {
-                ss[0].add(s);
+                templateSteps[0].add(s);
             }
 
             if (steps.indexOf(s) == steps.size() - 1) {
-                allPairs.put(logCase[0], ss[0]);
+                allPairs.put(logCase[0], templateSteps[0]);
             }
         };
 
