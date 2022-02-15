@@ -53,6 +53,32 @@ public class CodeBuilder {
         return allPairs;
     }
 
+    
+    private static Map<String, Collection<Steps>> separateSteps(List<Steps> steps) {
+        //import com.google.common.collect.LinkedListMultimap;
+        //import com.google.common.collect.Multimap;
+        Multimap<String, Steps> result = LinkedListMultimap.create();
+        AtomicReference<String> currentKey = new AtomicReference<>();
+
+        if (!steps.get(0).getClassName().contains("Reports.logCase")) {
+            currentKey.set("DefaultCaseId");
+        }
+
+        steps.forEach(s -> {
+            if (s.getClassName().contains("Reports.logCase")) {
+                currentKey.set(s.getCalssName()); // actualy we should get step parameter
+            } else {
+                result.put(currentKey.get(), s);
+            }
+        });
+        
+        if (!result.containsKey(currentKey.get())) {
+            throws new RuntimeException("unexpected report step at the end of test");
+        }
+
+        return result.asMap();
+    }
+
     private List<MethodSpec> buildMethods(Map<String, List<Steps>> allPairs, String className) {
         List<MethodSpec> methods = new ArrayList<>();
         allPairs.forEach((annotation, steps) -> {
